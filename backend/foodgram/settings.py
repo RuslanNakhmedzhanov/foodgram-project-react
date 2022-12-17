@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'colorfield',
+    'django_filters'
 ]
 
 MIDDLEWARE = [
@@ -123,13 +124,13 @@ AUTH_USER_MODEL = 'users.User'
 DJOSER = {
     'LOGIN_FIELD': 'email',
     'SEND_ACTIVATION_EMAIL': False,
-    'SERIALIZERS': {
-        'user': 'api.serializers.CustomUserSerializer',
-        'user_create': 'api.serializers.CustomUserCreateSerializer',
-        'current_user': 'api.serializers.CustomUserSerializer',
-    },
     'PERMISSIONS': {
         'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
         'user_list': ['rest_framework.permissions.AllowAny']
     },
 }
+
+EMAIL_MAX_LENGTH = 254
+USERNAME_MAX_LENGTH = 150
+NAME_MAX_LENGTH = 200
+SLUG_MAX_LENGTH = 256

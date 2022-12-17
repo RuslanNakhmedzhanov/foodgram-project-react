@@ -2,7 +2,6 @@ from django.contrib import admin
 
 from .models import (
     Favorite,
-    Follow,
     Ingredient,
     IngredientRecipe,
     Recipe,
@@ -46,7 +45,7 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'author', 'get_favorites', 'get_tags',)
     list_filter = ('author', 'name', 'tags')
     search_fields = ('name',)
-    inlines = (IngredientRecipeInline,)
+    # inlines = (IngredientRecipeInline,)
 
     def get_favorites(self, obj):
         return obj.favorites.count()
@@ -61,29 +60,20 @@ class RecipeAdmin(admin.ModelAdmin):
     get_tags.short_description = 'Тег или список тегов'
 
 
-@admin.register(Follow)
-class FollowAdmin(admin.ModelAdmin):
-    """Класс настройки раздела подписки"""
-
-    list_display = ('pk', 'user', 'author')
-    search_fields = ('user', 'author')
-    list_filter = ('user', 'author')
-
-
-@admin.register(Favorite)
-class FavoriteAdmin(admin.ModelAdmin):
-    """Класс настройки раздела избранное"""
-
-    list_display = ('pk', 'user', 'recipe')
-
-
 @admin.register(IngredientRecipe)
 class IngredientRecipeAdmin(admin.ModelAdmin):
     """Класс настройки соответствия ингредиентов и рецепта"""
 
-    list_display = ('pk', 'ingredient', 'recipe', 'amount')
+    list_display = ('pk', 'ingredient', 'amount')
 
 
 @admin.register(ShoppingList)
 class ShoppingListAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'recipe')
+    search_fields = ('user__username', 'user__email')
+    empty_value_display = '-пусто-'

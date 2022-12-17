@@ -1,20 +1,18 @@
-from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
 from recipes.models import (
     Favorite,
-    Follow,
     Ingredient,
     IngredientRecipe,
     Recipe,
     ShoppingList,
     Tag
 )
-from users.models import User
+from users.models import User, Follow
 
 
-class CustomUserSerializer(UserSerializer):
+class CurrentUserSerializer(serializers.ModelSerializer):
     """Сериализатор для модели User"""
 
     is_subscribed = serializers.SerializerMethodField(read_only=True)
@@ -28,15 +26,7 @@ class CustomUserSerializer(UserSerializer):
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
-        return Follow.objects.filter(user=user, author=obj.id).exists()
-
-
-class CustomUserCreateSerializer(UserCreateSerializer):
-    """Сериализатор для создания объекта класса User"""
-
-    class Meta:
-        model = User
-        fields = ('email', 'username', 'first_name', 'last_name', 'password')
+        return Follow.objects.select_related('follow')
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -72,7 +62,7 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Recipe"""
 
-    author = CustomUserSerializer(read_only=True)
+    author = CurrentUserSerializer(read_only=True)
     ingredients = IngredientRecipeSerializer(source='ingredient_amounts',
                                              many=True, read_only=True)
     tags = TagSerializer(many=True, read_only=True)
@@ -96,8 +86,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
-        return name_class.objects.filter(user=request.user,
-                                         recipe=recipe).exists()
+        return name_class.objects.selct_related("recipe")
 
 
 class AddIngredientSerializer(serializers.ModelSerializer):
@@ -113,7 +102,7 @@ class AddIngredientSerializer(serializers.ModelSerializer):
 class RecipeCreateSerializer(serializers.ModelSerializer):
     """Сериализатор для создания и изменения рецептов"""
 
-    author = CustomUserSerializer(read_only=True)
+    author = CurrentUserSerializer(read_only=True)
     ingredients = AddIngredientSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
@@ -208,7 +197,7 @@ class RecipeShortSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
-class FollowSerializer(CustomUserSerializer):
+class FollowSerializer(CurrentUserSerializer):
     """Сериализатор для модели Follow"""
 
     recipes = serializers.SerializerMethodField(read_only=True)
@@ -223,8 +212,11 @@ class FollowSerializer(CustomUserSerializer):
         request = self.context.get('request')
         recipes = obj.recipes.all()
         recipes_limit = request.query_params.get('recipes_limit')
-        if recipes_limit:
-            recipes = recipes[:int(recipes_limit)]
+        if recipes_limit is not None:
+            try:
+                recipes = recipes[:int(recipes_limit)]
+            except TypeError:
+                "Ошибка преобразования типа."
         return RecipeShortSerializer(recipes, many=True).data
 
     @staticmethod

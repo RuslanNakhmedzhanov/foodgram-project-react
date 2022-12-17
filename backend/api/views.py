@@ -1,7 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from djoser.views import UserViewSet
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (
@@ -13,18 +12,17 @@ from rest_framework.response import Response
 
 from recipes.models import (
     Favorite,
-    Follow,
     Ingredient,
     Recipe,
     ShoppingList,
     Tag
 )
-from users.models import User
+from users.models import User, Follow
 
 from .filters import IngredientSearchFilter, RecipeFilter
 from .permissions import IsAuthorOrReadOnlyPermission
 from .serializers import (
-    CustomUserSerializer,
+    CurrentUserSerializer,
     FavoriteSerializer,
     FollowSerializer,
     IngredientSerializer,
@@ -36,11 +34,11 @@ from .serializers import (
 from .utils import get_shopping_cart
 
 
-class CustomUserViewSet(UserViewSet):
+class CurrentUserViewSet(viewsets.GenericViewSet):
     """Вьюсет для работы с обьектами класса User и подписки на авторов"""
 
     queryset = User.objects.all()
-    serializer_class = CustomUserSerializer
+    serializer_class = CurrentUserSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     @action(

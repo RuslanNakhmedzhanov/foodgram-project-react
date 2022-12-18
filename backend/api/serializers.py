@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
@@ -9,7 +10,7 @@ from recipes.models import (
     ShoppingList,
     Tag
 )
-from users.models import User, Follow
+from users.models import User
 
 
 class CurrentUserSerializer(serializers.ModelSerializer):
@@ -26,7 +27,7 @@ class CurrentUserSerializer(serializers.ModelSerializer):
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
-        return Follow.objects.select_related('follow')
+        return user.following.filter(author=obj).exists()
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -63,8 +64,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Recipe"""
 
     author = CurrentUserSerializer(read_only=True)
-    ingredients = IngredientRecipeSerializer(source='ingredient_amounts',
-                                             many=True, read_only=True)
+    ingredients = IngredientRecipeSerializer(many=True, read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     is_favorited = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
@@ -77,16 +77,16 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'cooking_time')
 
     def get_is_favorited(self, obj):
-        return self._obj_exists(obj, Favorite)
+        user = self.context['request'].user
+        if not user or user.is_anonymous:
+            return False
+        return user.favorites.filter(author=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
-        return self._obj_exists(obj, ShoppingList)
-
-    def _obj_exists(self, recipe, name_class):
-        request = self.context.get('request')
-        if not request or request.user.is_anonymous:
+        user = self.context['request'].user
+        if not user or user.is_anonymous:
             return False
-        return name_class.objects.selct_related("recipe")
+        return user.shop_list.filter(author=obj).exists()
 
 
 class AddIngredientSerializer(serializers.ModelSerializer):
@@ -215,7 +215,7 @@ class FollowSerializer(CurrentUserSerializer):
         if recipes_limit is not None:
             try:
                 recipes = recipes[:int(recipes_limit)]
-            except TypeError:
+            except ValueError:
                 "Ошибка преобразования типа."
         return RecipeShortSerializer(recipes, many=True).data
 

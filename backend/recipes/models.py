@@ -41,7 +41,7 @@ class Ingredient(models.Model):
     """Класс ингредиентов"""
 
     name = models.CharField(
-        max_length=200,
+        max_length=settings.NAME_MAX_LENGTH,
         verbose_name='Название',
         validators=[name_validator]
     )
@@ -77,9 +77,9 @@ class Recipe(models.Model):
     text = models.TextField(
         verbose_name='Описание блюда')
     ingredients = models.ManyToManyField(
-        Ingredient,
+        "IngredientRecipe",
+        related_name='recipes',
         verbose_name='Ингредиенты блюда',
-        through="IngredientRecipe"
     )
     tags = models.ManyToManyField(
         Tag,
@@ -111,13 +111,6 @@ class IngredientRecipe(models.Model):
         Ingredient,
         on_delete=models.CASCADE,
         verbose_name='Ингредиент',
-        related_name='+'
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='ingredient_amounts',
-        verbose_name='Рецепт'
     )
     amount = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(
@@ -131,7 +124,7 @@ class IngredientRecipe(models.Model):
         verbose_name_plural = 'Количество ингредиентов'
 
     def __str__(self):
-        return f'{self.ingredient} {self.recipe}'
+        return f'{self.ingredient}'
 
 
 class Favorite(models.Model):

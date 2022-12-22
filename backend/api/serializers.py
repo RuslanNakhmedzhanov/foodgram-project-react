@@ -1,6 +1,6 @@
+from django.db.transaction import atomic
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
-from django.db.transaction import atomic
 
 from recipes.models import (
     Favorite,

@@ -3,7 +3,7 @@ from django.contrib import admin
 from .models import (
     Favorite,
     Ingredient,
-    IngredientRecipe,
+    IngredientInRecipe,
     Recipe,
     ShoppingList,
     Tag
@@ -27,40 +27,29 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-class IngredientRecipeInline(admin.TabularInline):
-    """
-    Вспомогательный класс, чтобы в классе RecipeAdmin можно было настроивать
-    ингредиенты
-    """
-
-    model = IngredientRecipe
-    min_num = 1
-    extra = 1
+class TabularRecipeIngredientAdmin(admin.TabularInline):
+    model = IngredientInRecipe
+    fk_name = 'recipe_parent'
 
 
 @admin.register(Recipe)
-class RecipeAdmin(admin.ModelAdmin):
-    """Класс настройки раздела рецептов"""
-
-    list_display = ('pk', 'name', 'author', 'get_favorites', 'get_tags',)
+class RecipesAdmin(admin.ModelAdmin):
+    list_display = ('name', 'author', 'favorited')
     list_filter = ('author', 'name', 'tags')
-    search_fields = ('name',)
-    # inlines = (IngredientRecipeInline,)
+    exclude = ('ingredients',)
+    search_fields = ('^name',)
+    filter_horizontal = ('tags',)
+    inlines = [
+        TabularRecipeIngredientAdmin,
+    ]
 
-    def get_favorites(self, obj):
-        return obj.favorites.count()
+    def favorited(self, obj):
+        return Favorite.objects.filter(recipe=obj).count()
 
-    get_favorites.short_description = (
-        'Количество добавлений рецепта в избранное'
-    )
-
-    def get_tags(self, obj):
-        return '\n'.join((tag.name for tag in obj.tags.all()))
-
-    get_tags.short_description = 'Тег или список тегов'
+    favorited.short_description = 'Кол-во людей добавивших в избранное'
 
 
-@admin.register(IngredientRecipe)
+@admin.register(IngredientInRecipe)
 class IngredientRecipeAdmin(admin.ModelAdmin):
     """Класс настройки соответствия ингредиентов и рецепта"""
 

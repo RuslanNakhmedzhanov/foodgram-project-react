@@ -154,6 +154,13 @@ sudo docker-compose exec backend python manage.py createsuperuser
 ```
 sudo docker-compose exec backend python manage.py load_data
 ```
+- Для доступа в панель администратора ввести:
+
+email: rusa@mail.ru
+password: 1234
+```
+sudo docker-compose exec backend python manage.py createsuperuser
+```
 - Готово! Переходите на сервер, все работает.
 </details>
 

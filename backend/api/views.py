@@ -27,6 +27,7 @@ from .serializers import (
     TagSerializer
 )
 from .shop_cart import create_shopping_cart
+from .permissions import IsAuthorOrReadOnlyPermission
 
 
 class CurrentUserViewSet(viewsets.GenericViewSet):
@@ -98,6 +99,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
+    permission_class = IsAuthorOrReadOnlyPermission
     filterset_fields = [
         'tags', 'author', 'is_in_shopping_cart', 'is_favorited'
     ]

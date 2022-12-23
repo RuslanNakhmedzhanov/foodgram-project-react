@@ -159,7 +159,7 @@ sudo docker-compose exec backend python manage.py load_data
 email: rusa@mail.ru password: 1234
 ```
 - Готово! Переходите на сервер, все работает.
-```
+
 ***
 </details>
 

@@ -17,7 +17,6 @@ from recipes.models import (
 from users.models import User
 
 from .filters import IngredientSearchFilter, RecipeFilter
-from .permissions import IsAuthorOrReadOnlyPermission
 from .serializers import (
     FavoriteSerializer,
     FollowSerializer,
@@ -99,7 +98,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    permission_class = IsAuthorOrReadOnlyPermission
     filterset_fields = [
         'tags', 'author', 'is_in_shopping_cart', 'is_favorited'
     ]

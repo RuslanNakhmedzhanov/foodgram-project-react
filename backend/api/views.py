@@ -17,6 +17,7 @@ from recipes.models import (
 from users.models import User
 
 from .filters import IngredientSearchFilter, RecipeFilter
+from .permissions import IsAuthorOrReadOnlyPermission
 from .serializers import (
     FavoriteSerializer,
     FollowSerializer,
@@ -27,7 +28,6 @@ from .serializers import (
     TagSerializer
 )
 from .shop_cart import create_shopping_cart
-from .permissions import IsAuthorOrReadOnlyPermission
 
 
 class CurrentUserViewSet(viewsets.GenericViewSet):

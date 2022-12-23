@@ -163,7 +163,7 @@ email: rusa@mail.ru password: 1234
 sudo docker-compose exec backend python manage.py createsuperuser
 ```
 - Готово! Переходите на сервер, все работает.
-```
+
 ***
 </details>
 

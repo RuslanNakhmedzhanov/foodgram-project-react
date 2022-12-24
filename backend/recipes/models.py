@@ -105,6 +105,7 @@ class Recipe(models.Model):
     """ Модель рецептов. """
     name = models.CharField(
         verbose_name='Название рецепта',
+        validators=[name_validator],
         max_length=200,
         unique=True,
         error_messages={
@@ -112,7 +113,6 @@ class Recipe(models.Model):
         },
     )
     image = models.ImageField(
-        blank=True,
         verbose_name='Фото',
         upload_to='recipes/images'
     )

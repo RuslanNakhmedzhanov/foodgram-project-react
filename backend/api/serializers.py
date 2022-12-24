@@ -238,10 +238,10 @@ class FavoriteSerializer(RecipeShortSerializer):
         fields = ('user', 'recipe')
 
     def to_representation(self, instance):
-        return representation(
-            self.context,
-            instance.recipe,
-            RecipeShortSerializer)
+        request = self.context.get('request')
+        context = {'request': request}
+        return RecipeShortSerializer(
+            instance.recipe, context=context).data
 
 
 class ShoppingListSerializer(RecipeShortSerializer):
@@ -251,16 +251,24 @@ class ShoppingListSerializer(RecipeShortSerializer):
         model = ShoppingList
         fields = ('user', 'recipe')
 
+    def validate(self, data):
+        request = self.context.get('request')
+        recipe_id = data['recipe'].id
+        purchase_exists = ShoppingList.objects.filter(
+            user=request.user,
+            recipe__id=recipe_id
+        ).exists()
+
+        if request.method == 'POST' and purchase_exists:
+            raise serializers.ValidationError(
+                'Рецепт уже в списке покупок'
+            )
+
+        return data
+
     def to_representation(self, instance):
-        return representation(
-            self.context,
+        request = self.context.get('request')
+        context = {'request': request}
+        return RecipeShortSerializer(
             instance.recipe,
-            RecipeShortSerializer)
-
-
-def representation(context, instance, serializer):
-    """Функция для использования в to_representation"""
-
-    request = context.get('request')
-    new_context = {'request': request}
-    return serializer(instance, context=new_context).data
+            context=context).data

@@ -44,7 +44,9 @@ class Ingredient(models.Model):
     name = models.CharField(
         max_length=settings.NAME_MAX_LENGTH,
         verbose_name='Название',
-        validators=[name_validator]
+        validators=[name_validator],
+        unique=True,
+        blank=False
     )
     measurement_unit = models.CharField(
         max_length=20,
@@ -72,10 +74,11 @@ class IngredientInRecipe(models.Model):
         Ingredient,
         on_delete=models.CASCADE,
         verbose_name='Название ингредиента в рецепте',
-        related_name='+'
+        related_name='+',
     )
     amount = models.PositiveSmallIntegerField(
         verbose_name='Количество ингредиента в рецепте',
+        default='г',
         validators=[
             MinValueValidator(
                 1,
@@ -137,7 +140,8 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         IngredientInRecipe,
         related_name='recipe',
-        symmetrical=False
+        null=False,
+        blank=True
     )
     cooking_time = models.PositiveSmallIntegerField(
         validators=[

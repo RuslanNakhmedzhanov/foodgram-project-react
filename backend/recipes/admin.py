@@ -30,6 +30,7 @@ class IngredientAdmin(admin.ModelAdmin):
 class TabularRecipeIngredientAdmin(admin.TabularInline):
     model = IngredientInRecipe
     fk_name = 'recipe_parent'
+    extra = 1
 
 
 @admin.register(Recipe)

@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from users.validators import name_validator, name_valid
+from users.validators import name_valid
 
 User = get_user_model()
 

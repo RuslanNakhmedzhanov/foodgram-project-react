@@ -4,7 +4,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
 from .manager import UserManager
-from .validators import name_validator, name_valid
+from .validators import name_valid, name_validator
 
 
 class User(AbstractUser):

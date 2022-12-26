@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from users.validators import name_validator
+from users.validators import name_validator, name_valid
 
 User = get_user_model()
 
@@ -16,7 +16,7 @@ class Tag(models.Model):
         verbose_name='Тег',
         max_length=settings.NAME_MAX_LENGTH,
         unique=True,
-        validators=[name_validator]
+        validators=[name_valid]
     )
     color = ColorField(
         verbose_name='Hex-цвет',
@@ -44,7 +44,7 @@ class Ingredient(models.Model):
     name = models.CharField(
         max_length=settings.NAME_MAX_LENGTH,
         verbose_name='Название',
-        validators=[name_validator],
+        validators=[name_valid],
         unique=True,
         blank=False
     )
@@ -108,7 +108,7 @@ class Recipe(models.Model):
     """ Модель рецептов. """
     name = models.CharField(
         verbose_name='Название рецепта',
-        validators=[name_validator],
+        validators=[name_valid],
         max_length=200,
         unique=True,
         error_messages={

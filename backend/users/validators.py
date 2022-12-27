@@ -1,19 +1,19 @@
 from django.core.validators import RegexValidator
-from rest_framework.exceptions import ValidationError
+from django.utils.translation import ugettext_lazy as _
 
-WRONG_USERNAME_LIST = ["me", "Me", "ME"]
-WRONG_USERNAME = '"me", "Me", "ME" - недопустимое имя пользователя!'
+RESERVED_USERNAME: str = r'^[me, Me, ME]*$'
+ACCEPT_REGEX: bool = False
+REJECT_REGEX: bool = True
+USERNAME_REGEXES: list = [
+    (fr'(^{RESERVED_USERNAME})$', REJECT_REGEX),
+    (r'(^[\w.@+-]+)$', ACCEPT_REGEX,),
+]
 
 
 def name_validator(value):
-    """
-    username != 'me'
-    username includes only letters, digits and @/./+/-/_
-    """
-    if value in WRONG_USERNAME_LIST:
-        raise ValidationError(WRONG_USERNAME)
-    return value
-
-
-name_valid = RegexValidator(r'^[a-zA-Z0-9]*$',
-                            'Недопустимые символы в названии.')
+    for regex, inverse_match in USERNAME_REGEXES:
+        RegexValidator(
+            regex=regex,
+            message=_(f'{value} - недопустимые символы.'),
+            inverse_match=inverse_match
+        )(value)

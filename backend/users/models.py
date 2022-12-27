@@ -4,7 +4,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
 from .manager import UserManager
-from .validators import name_valid, name_validator
+from .validators import name_validator
 
 
 class User(AbstractUser):
@@ -16,7 +16,7 @@ class User(AbstractUser):
     username = models.CharField(
         max_length=settings.USERNAME_MAX_LENGTH,
         unique=True,
-        validators=[name_validator, name_valid],
+        validators=[name_validator],
         verbose_name='Имя пользователя',
     )
     email = models.EmailField(
